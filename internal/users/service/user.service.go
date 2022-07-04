@@ -37,6 +37,13 @@ func (us *UsersService) Login(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Print("error occued FindUser ", err.Error())
+		// delete cookie
+		http.SetCookie(w, &http.Cookie{
+			Name:       auth.TokenName,
+			Value:      "",
+			Path:       "/",
+			RawExpires: "0",
+		})
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -59,13 +66,14 @@ func (us *UsersService) CreateUser(w http.ResponseWriter, r *http.Request) {
 	user := &users.User{}
 	json.NewDecoder(r.Body).Decode(user)
 
-	_, err := us.DB.FindUser(user.Email, user.Password)
+	/*
+		_, err := us.DB.FindUser(user.Email, user.Password)
 
-	if err == nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
+		if err == nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	*/
 	if err := us.DB.CreateUser(user); err != nil {
 		log.Print("error occued CreateUser ", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)

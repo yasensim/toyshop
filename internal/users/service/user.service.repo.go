@@ -2,26 +2,31 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"log"
 	"time"
 
 	database "github.com/yasensim/toyshop/internal/db"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/yasensim/toyshop/internal/users"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UsersDB struct {
-	*sql.DB
+type TableBasics struct {
+	DynamoDbClient *dynamodb.Client
+	TableName      string
 }
 
 func GetUsersDataStore() users.UserDatastore {
-	return &UsersDB{database.Get()}
+	return &TableBasics{database.CreateLocalClient(), "users"}
 }
 
-func (db *UsersDB) CreateUser(user *users.User) error {
+func (basics TableBasics) CreateUser(user *users.User) error {
 	if user.Email == "" || user.Password == "" || user.Name == "" {
 		return errors.New("user service repo - cannot have empty fields")
 	}
@@ -32,43 +37,42 @@ func (db *UsersDB) CreateUser(user *users.User) error {
 		return errors.New("user service repo - password encryption failed")
 	}
 	user.Password = string(pass)
-
+	item, err := attributevalue.MarshalMap(user)
+	if err != nil {
+		panic(err)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
-
-	result, err := db.ExecContext(ctx, "insert into users (name, email, password) values (?, ?, ?)",
-		user.Name, user.Email, user.Password)
-
+	_, err = basics.DynamoDbClient.PutItem(ctx, &dynamodb.PutItemInput{
+		TableName: aws.String(basics.TableName), Item: item,
+	})
 	if err != nil {
-		return err
+		log.Printf("Couldn't add item to table. Here's why: %v\n", err)
 	}
 
-	id, e := result.LastInsertId()
-	if e != nil {
-		return e
-	}
-
-	user.ID = uint(id)
-
-	return nil
+	return err
 }
 
-func (db *UsersDB) FindUser(email, password string) (*users.User, error) {
+func (basics TableBasics) FindUser(email, password string) (*users.User, error) {
 	user := &users.User{}
 
 	if email == "" || password == "" {
 		return nil, errors.New("user service repo - cannot have empty email or password")
 	}
+	eml, err := attributevalue.Marshal(email)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	row := db.QueryRowContext(ctx, "select id, name, email, password from users where email = ?", email)
+	response, err := basics.DynamoDbClient.GetItem(ctx, &dynamodb.GetItemInput{Key: map[string]types.AttributeValue{"email": eml}, TableName: aws.String(basics.TableName)})
 
-	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Password)
-
-	if err == sql.ErrNoRows {
-		return nil, err
+	if err != nil {
+		log.Printf("Couldn't get info about %v. Here's why: %v\n", email, err)
+	} else {
+		err = attributevalue.UnmarshalMap(response.Item, user)
+		if err != nil {
+			log.Printf("Couldn't unmarshal response. Here's why: %v\n", err)
+		}
 	}
 
 	errf := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))

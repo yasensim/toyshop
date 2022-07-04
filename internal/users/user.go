@@ -5,10 +5,10 @@ import "net/http"
 // This should actually be pulled into a separate package
 // since used from multiple locations
 type User struct {
-	ID       uint   `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	ID       uint   `json:"id" dynamodbav:"id"`
+	Name     string `json:"name" dynamodbav:"name"`
+	Email    string `json:"email" dynamodbav:"email"`
+	Password string `json:"password" dynamodb:"password"`
 }
 
 type UserDatastore interface {
