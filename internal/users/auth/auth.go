@@ -134,7 +134,7 @@ func (jwtAuth JwtAuthenticator) JwtVerify(next http.Handler) http.Handler {
 }
 
 func (jwtAuth JwtAuthenticator) GetTokenForUser(user *users.User) (string, error) {
-	expiresAt := time.Now().Add(time.Minute * 100000).Unix()
+	expiresAt := time.Now().Add(time.Minute * 5).Unix()
 
 	tk := &Token{
 		UserID: user.ID,

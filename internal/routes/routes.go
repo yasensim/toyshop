@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	toysService "github.com/yasensim/toyshop/internal/toys/service"
 	"github.com/yasensim/toyshop/internal/users/auth"
 	userService "github.com/yasensim/toyshop/internal/users/service"
 )
@@ -14,7 +13,6 @@ func Handlers() *mux.Router {
 
 	r.Use(CommonMiddleware)
 	us := userService.Get()
-	ts := toysService.Get()
 	av := auth.GetAuthenticator()
 
 	r.HandleFunc("/register", us.CreateUser).Methods("POST")
@@ -22,11 +20,10 @@ func Handlers() *mux.Router {
 
 	s := r.PathPrefix("/auth").Subrouter()
 	s.Use(av.JwtVerify)
-	s.HandleFunc("/toys", ts.GetAllToys).Methods("GET")
-	s.HandleFunc("/toys/{id}", ts.GetToy).Methods("GET")
-	s.HandleFunc("/toys", ts.CreateToy).Methods("POST")
-	s.HandleFunc("/toys/{id}", ts.UpdateToy).Methods("PUT")
-	s.HandleFunc("/toys/{id}", ts.DeleteToy).Methods("DELETE")
+	s.HandleFunc("/toys", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, I am protected"))
+	}).Methods("GET")
+	//	s.HandleFunc("/toys/{id}", ts.GetToy).Methods("GET")
 
 	return r
 }
