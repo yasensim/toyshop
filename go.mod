@@ -1,13 +1,13 @@
 module github.com/yasensim/toyshop
 
-go 1.17
+go 1.18
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.16.6
 	github.com/aws/aws-sdk-go-v2/config v1.15.12
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.9.5
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.15.8
-	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gorilla/mux v1.8.0
 	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e
 )
