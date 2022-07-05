@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/yasensim/toyshop/internal/users"
 	"github.com/yasensim/toyshop/internal/users/auth"
 )
@@ -69,6 +70,8 @@ func (us *UsersService) Login(w http.ResponseWriter, r *http.Request) {
 func (us *UsersService) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	user := &users.User{}
+	user.ID = uuid.New().String()
+	user.Org = uuid.New().String()
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 	user.Region = "default"

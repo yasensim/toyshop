@@ -105,9 +105,11 @@ func (jwtAuth JwtAuthenticator) UserFromToken(tokenString string) (*users.User, 
 
 	//this is for simplicity, we could also just have the id of the user in the token and fetch the rest from the db
 	var usr = users.User{
+		ID:     tk.ID,
 		Email:  tk.Email,
 		Name:   tk.Name,
 		Region: tk.Region,
+		Org:    tk.Org,
 	}
 	return &usr, err
 }
@@ -127,6 +129,7 @@ func (jwtAuth JwtAuthenticator) JwtVerify(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
+		log.Printf("User %s with id %s, email %s and Org %s was validated from token!\n", usr.Name, usr.ID, usr.Email, usr.Org)
 
 		ctx := context.WithValue(r.Context(), "user", usr)
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -137,9 +140,11 @@ func (jwtAuth JwtAuthenticator) GetTokenForUser(user *users.User) (string, error
 	expiresAt := time.Now().Add(time.Minute * 5).Unix()
 
 	tk := &Token{
+		ID:     user.ID,
 		Name:   user.Name,
 		Email:  user.Email,
 		Region: user.Region,
+		Org:    user.Org,
 		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: expiresAt,
 		},
@@ -152,6 +157,5 @@ func (jwtAuth JwtAuthenticator) GetTokenForUser(user *users.User) (string, error
 	if err != nil {
 		return "", errors.New("auth - message sorry, error while signing token")
 	}
-
 	return tokenString, nil
 }

@@ -8,6 +8,7 @@ import (
 // This should actually be pulled into a separate package
 // since used from multiple locations
 type User struct {
+	ID        string    `json:"_id" dynamodbav:"id"`
 	Name      string    `json:"name" dynamodbav:"name"`
 	Email     string    `json:"email" dynamodbav:"email"`
 	Password  string    `json:"password" dynamodb:"password"`

@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.9.5
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.15.8
 	github.com/golang-jwt/jwt/v4 v4.4.2
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e
 )

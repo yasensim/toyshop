@@ -20,7 +20,7 @@ func Handlers() *mux.Router {
 
 	s := r.PathPrefix("/auth").Subrouter()
 	s.Use(av.JwtVerify)
-	s.HandleFunc("/toys", func(w http.ResponseWriter, r *http.Request) {
+	s.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello, I am protected"))
 	}).Methods("GET")
 	//	s.HandleFunc("/toys/{id}", ts.GetToy).Methods("GET")
