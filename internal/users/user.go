@@ -1,14 +1,22 @@
 package users
 
-import "net/http"
+import (
+	"net/http"
+	"time"
+)
 
 // This should actually be pulled into a separate package
 // since used from multiple locations
 type User struct {
-	ID       uint   `json:"id" dynamodbav:"id"`
-	Name     string `json:"name" dynamodbav:"name"`
-	Email    string `json:"email" dynamodbav:"email"`
-	Password string `json:"password" dynamodb:"password"`
+	Name      string    `json:"name" dynamodbav:"name"`
+	Email     string    `json:"email" dynamodbav:"email"`
+	Password  string    `json:"password" dynamodb:"password"`
+	Org       string    `json:"org" dynamodbav:"org"`
+	Region    string    `json:"region" dynamodbav:"reg"`
+	Active    bool      `json:"active" dynamodbav:"act"`
+	Info      string    `json:"info" dynamodbav:"info"`
+	CreatedAt time.Time `json:"createdAt" dynamodbav:"cr"`
+	UpdatedAt time.Time `json:"updatedAt" dynamodbav:"upd"`
 }
 
 type UserDatastore interface {

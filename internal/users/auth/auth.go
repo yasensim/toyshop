@@ -105,9 +105,9 @@ func (jwtAuth JwtAuthenticator) UserFromToken(tokenString string) (*users.User, 
 
 	//this is for simplicity, we could also just have the id of the user in the token and fetch the rest from the db
 	var usr = users.User{
-		Email: tk.Email,
-		Name:  tk.Name,
-		ID:    tk.UserID,
+		Email:  tk.Email,
+		Name:   tk.Name,
+		Region: tk.Region,
 	}
 	return &usr, err
 }
@@ -137,9 +137,9 @@ func (jwtAuth JwtAuthenticator) GetTokenForUser(user *users.User) (string, error
 	expiresAt := time.Now().Add(time.Minute * 5).Unix()
 
 	tk := &Token{
-		UserID: user.ID,
 		Name:   user.Name,
 		Email:  user.Email,
+		Region: user.Region,
 		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: expiresAt,
 		},

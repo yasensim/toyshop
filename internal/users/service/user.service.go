@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/yasensim/toyshop/internal/users"
 	"github.com/yasensim/toyshop/internal/users/auth"
@@ -53,17 +54,25 @@ func (us *UsersService) Login(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:       auth.TokenName,
 		Value:      tokenString,
+		HttpOnly:   true,
+		Secure:     false,       // set secure cookie to true for production !!!
+		Domain:     "localhost", //change to actual domain
 		Path:       "/",
 		RawExpires: "0",
 	})
-
-	var resp = map[string]interface{}{"status": true, "access-token": tokenString, "user": currUser}
+	log.Println("User " + currUser.Name + " with email " + currUser.Email + " has loged in!")
+	//var resp = map[string]interface{}{"status": true, "access-token": tokenString, "user": currUser}
+	var resp = map[string]interface{}{"status": true, "user": currUser.Name}
 	json.NewEncoder(w).Encode(resp)
 }
 
 func (us *UsersService) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	user := &users.User{}
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+	user.Region = "default"
+	user.Active = true
 	json.NewDecoder(r.Body).Decode(user)
 
 	/*
@@ -79,6 +88,7 @@ func (us *UsersService) CreateUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	log.Println("User " + user.Name + " with email " + user.Email + " was created!")
 	w.WriteHeader(http.StatusCreated)
 
 	var resp = map[string]interface{}{"status": true, "user": user}
